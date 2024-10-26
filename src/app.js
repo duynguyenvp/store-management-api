@@ -11,12 +11,10 @@ import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
 
-import dotenv from "dotenv";
+import 'dotenv/config'
 
 import api from "./api";
 import { responseFormatter, errorHandler, notFound } from "./middlewares/response";
-
-dotenv.config();
 
 const mongoString = process.env.DATABASE_URL;
 

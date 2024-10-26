@@ -1,9 +1,9 @@
 import express from 'express';
-import verifyToken from '../middlewares/authMiddleware';
+import { checkPermission } from '../middlewares/permission';
 
 const router = express.Router();
 
-router.get('/', verifyToken, (req, res) => {
+router.get('/', checkPermission("read_record"), (req, res) => {
   res.success(['😀', '😳', '🙄']);
 });
 

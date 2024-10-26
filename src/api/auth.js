@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import { UserRepository } from "../models/user";
 import { AUTH_SECRET_KEY } from "../constant";
 
-const tokenExpiresIn = process.env.TOKEN_EXPIRES_IN || 600;
+const tokenExpiresIn = parseInt(process.env.TOKEN_EXPIRES_IN || 600);
 const refreshTokenExpiresIn = process.env.REFRESH_TOKEN_EXPIRES_IN || '1d';
 
 const router = express.Router();
@@ -32,6 +32,10 @@ const router = express.Router();
  *                 type: string
  *                 description: The password for the new user.
  *                 example: password123
+ *               role:
+ *                 type: string
+ *                 description: The role for the new user.
+ *                 example: employee
  *     responses:
  *       '201':
  *         description: User registered successfully
@@ -57,8 +61,8 @@ const router = express.Router();
 
 router.post("/register", async (req, res) => {
   try {
-    const { username, password } = req.body;
-    await UserRepository.create(username, password);
+    const { username, password, role } = req.body;
+    await UserRepository.create(username, password, role);
     res.success({ message: "User registered successfully" });
   } catch (error) {
     res.error("Registration failed", 500, error.message);

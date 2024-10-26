@@ -1,5 +1,6 @@
 import jwt, { TokenExpiredError } from "jsonwebtoken";
 import { AUTH_SECRET_KEY } from "../constant";
+import { UserRepository } from "../models/user";
 
 const catchError = (err, res) => {
   if (err instanceof TokenExpiredError) {
@@ -15,11 +16,16 @@ const verifyToken = (req, res, next) => {
     return res.error("Access Denied. No token provided.", 403);
   }
 
-  jwt.verify(token, AUTH_SECRET_KEY, (err, decoded) => {
+  jwt.verify(token, AUTH_SECRET_KEY, async (err, decoded) => {
     if (err) {
       return catchError(err, res);
     }
-    req.userId = decoded.id;
+    const user = await UserRepository.findById(decoded.userId);
+    req.user = {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+    };
     next();
   });
 };
