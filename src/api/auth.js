@@ -2,7 +2,7 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-import User from "../models/user";
+import { UserRepository } from "../models/user";
 import { AUTH_SECRET_KEY } from "../constant";
 
 const tokenExpiresIn = process.env.TOKEN_EXPIRES_IN || 600;
@@ -58,9 +58,7 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
   try {
     const { username, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ username, password: hashedPassword });
-    await user.save();
+    await UserRepository.create(username, password);
     res.success({ message: "User registered successfully" });
   } catch (error) {
     res.error("Registration failed", 500, error.message);
@@ -130,7 +128,7 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const user = await UserRepository.findByName(username);
     if (!user) {
       return res.error("Authentication failed", 401);
     }
@@ -208,7 +206,7 @@ router.post("/refresh", async (req, res) => {
 
   try {
     const decoded = jwt.verify(refreshToken, AUTH_SECRET_KEY);
-    const user = await User.findById(decoded.userId);
+    const user = await UserRepository.findById(decoded.userId);
     if (!user) {
       return res.error("Invalid refresh token.", 400);
     }

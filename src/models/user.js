@@ -1,7 +1,20 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema({
   username: { type: String, unique: true, required: true },
   password: { type: String, required: true }
 });
-export default mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+
+export const UserRepository = Object.freeze({
+  findById: async id => User.findById(id),
+  findByName: async username => User.findOne({ username }),
+  create: async (username, password) => {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ username, password: hashedPassword });
+    return user.save();
+  }
+});
+
+export default User;
