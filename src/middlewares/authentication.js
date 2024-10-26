@@ -1,12 +1,15 @@
 import jwt, { TokenExpiredError } from "jsonwebtoken";
 import { AUTH_SECRET_KEY } from "../constant";
 import { UserRepository } from "../models/user";
+import logger from "../logger";
 
 const catchError = (err, res) => {
   if (err instanceof TokenExpiredError) {
-    return res.error("Unauthorized! Access Token was expired!", 401);
+    logger.error("Access Token was expired:" + JSON.stringify(err));
+    return res.error("Access Token was expired!", 401);
   }
-
+  
+  logger.error("Unauthorized:" + JSON.stringify(err));
   return res.error("Unauthorized!", 401);
 }
 

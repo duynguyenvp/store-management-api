@@ -53,7 +53,7 @@ module.exports = {
     new NodemonPlugin({
       script: "./dist/server.js",
       watch: [path.resolve(__dirname, "dist")],
-      ignore: ["*.js.map"],
+      ignore: ["*.js.map", "*.log"],
       verbose: true,
       ext: "js,json",
       nodeArgs: ["--inspect"]

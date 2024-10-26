@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 
 import { UserRepository } from "../models/user";
 import { AUTH_SECRET_KEY } from "../constant";
+import logger from "../logger";
 
 const tokenExpiresIn = parseInt(process.env.TOKEN_EXPIRES_IN || 600);
 const refreshTokenExpiresIn = process.env.REFRESH_TOKEN_EXPIRES_IN || '1d';
@@ -65,6 +66,7 @@ router.post("/register", async (req, res) => {
     await UserRepository.create(username, password, role);
     res.success({ message: "User registered successfully" });
   } catch (error) {
+    logger.error("Registration failed:" + JSON.stringify(error));
     res.error("Registration failed", 500, error.message);
   }
 });
@@ -149,6 +151,7 @@ router.post("/login", async (req, res) => {
     });
     res.success({ token, refreshToken });
   } catch (error) {
+    logger.error("Login failed: " + JSON.stringify(error));
     res.error("Login failed", 401, error.message);
   }
 });
@@ -221,6 +224,7 @@ router.post("/refresh", async (req, res) => {
 
     res.success({ token: accessToken });
   } catch (error) {
+    logger.error("Invalid refresh token: " + JSON.stringify(error));
     return res.error("Invalid refresh token.", 400);
   }
 });

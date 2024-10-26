@@ -1,3 +1,5 @@
+import logger from "../logger";
+
 export const responseFormatter = (req, res, next) => {
   res.success = (data, metadata = {}, links = {}) => {
     res.status(200).json({
@@ -27,20 +29,21 @@ export const responseFormatter = (req, res, next) => {
 
 export const errorHandler = (err, req, res, next) => {
   const statusCode = err.statusCode || 500;
-  const message = err.message || 'Internal Server Error';
+  const message = err.message || "Internal Server Error";
 
+  logger.error(message + JSON.stringify(err));
   res.error(message, statusCode, {
-    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+    stack: process.env.NODE_ENV === "production" ? null : err.stack
   });
   next();
 };
 
 export function notFound(req, res, next) {
   const statusCode = err.statusCode || 404;
-  const message = err.message || 'Not Found';
+  const message = err.message || "Not Found";
 
   res.error(message, statusCode, {
-    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+    stack: process.env.NODE_ENV === "production" ? null : err.stack
   });
   next();
 }
