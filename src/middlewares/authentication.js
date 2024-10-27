@@ -19,7 +19,8 @@ const verifyToken = (req, res, next) => {
     return res.error("Access Denied. No token provided.", 403);
   }
 
-  jwt.verify(token, AUTH_SECRET_KEY, async (err, decoded) => {
+  const formatedToken = token.replace('Bearer ', '').replace('bearer ', '');
+  jwt.verify(formatedToken, AUTH_SECRET_KEY, async (err, decoded) => {
     if (err) {
       return catchError(err, res);
     }

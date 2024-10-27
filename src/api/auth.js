@@ -5,9 +5,10 @@ import jwt from "jsonwebtoken";
 import { UserRepository } from "../models/user";
 import { AUTH_SECRET_KEY } from "../constant";
 import logger from "../logger";
+import verifyToken from "../middlewares/authentication";
 
 const tokenExpiresIn = parseInt(process.env.TOKEN_EXPIRES_IN || 600);
-const refreshTokenExpiresIn = process.env.REFRESH_TOKEN_EXPIRES_IN || '1d';
+const refreshTokenExpiresIn = process.env.REFRESH_TOKEN_EXPIRES_IN || "1d";
 
 const router = express.Router();
 
@@ -149,7 +150,11 @@ router.post("/login", async (req, res) => {
     const refreshToken = jwt.sign({ userId: user._id }, AUTH_SECRET_KEY, {
       expiresIn: refreshTokenExpiresIn
     });
-    res.success({ token, refreshToken });
+    res.success({
+      token,
+      refreshToken,
+      user: { username: user.username, role: user.role, id: user.id }
+    });
   } catch (error) {
     logger.error("Login failed: " + JSON.stringify(error));
     res.error("Login failed", 401, error.message);
@@ -226,6 +231,78 @@ router.post("/refresh", async (req, res) => {
   } catch (error) {
     logger.error("Invalid refresh token: " + JSON.stringify(error));
     return res.error("Invalid refresh token.", 400);
+  }
+});
+
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ * 
+ * /auth/profile:
+ *   get:
+ *     summary: Get user profile
+ *     description: Retrieve the profile information of the authenticated user.
+ *     security:
+ *       - bearerAuth: []  # Assuming you are using bearer token for authentication
+ *     tags: [User]
+ *     responses:
+ *       200:
+ *         description: Successful retrieval of user profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 username:
+ *                   type: string
+ *                   example: johndoe
+ *                 role:
+ *                   type: string
+ *                   example: user
+ *                 id:
+ *                   type: string
+ *                   example: 123456
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: User requested was not found
+ *       401:
+ *         description: Unauthorized access
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Get profile failed
+ *                 message:
+ *                   type: string
+ *                   example: Invalid token
+ */
+
+router.get("/profile", verifyToken, async (req, res) => {
+  try {
+    const { id } = req.user;
+    const user = await UserRepository.findById(id);
+    if (!user) {
+      return res.error("User requested was not found", 404);
+    }
+    res.success({ username: user.username, role: user.role, id: user.id });
+  } catch (error) {
+    logger.error("Get profile failed: " + JSON.stringify(error));
+    res.error("Get profile failed", 401, error.message);
   }
 });
 

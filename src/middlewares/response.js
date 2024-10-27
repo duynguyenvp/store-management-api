@@ -38,7 +38,7 @@ export const errorHandler = (err, req, res, next) => {
   next();
 };
 
-export function notFound(req, res, next) {
+export function notFound(err, req, res, next) {
   const statusCode = err.statusCode || 404;
   const message = err.message || "Not Found";
 
