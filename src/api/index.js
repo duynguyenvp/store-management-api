@@ -1,6 +1,6 @@
 import express from "express";
 
-import emojis from "./emojis";
+import category from "./category";
 import auth from "./auth";
 import verifyToken from "../middlewares/authentication";
 
@@ -12,7 +12,7 @@ router.get("/", (req, res) => {
   });
 });
 
-router.use("/emojis", verifyToken, emojis);
+router.use("/category", verifyToken, category);
 router.use("/auth", auth);
 
 export default router;

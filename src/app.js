@@ -47,7 +47,7 @@ const swaggerOptions = {
   },
   apis: [
     "src/api/auth.js",
-    "./src/api/emojis.js"
+    "./src/api/category.js"
   ]
 };
 
